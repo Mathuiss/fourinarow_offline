@@ -1,4 +1,7 @@
+extern crate colored;
+
 use crate::models::game_core::{Coin, Player};
+use colored::*;
 use std::io::{stdout, Write};
 
 pub fn print_turn(player: &Player) {
@@ -25,10 +28,10 @@ pub fn print_board(board: &[[Coin; 7]; 6]) {
                     print!("[ ]");
                 }
                 Coin::Red => {
-                    print!("[R]");
+                    print!("{}", "[R]".red());
                 }
                 Coin::Yellow => {
-                    print!("[Y]");
+                    print!("{}", "[Y]".yellow());
                 }
             }
         }
@@ -42,6 +45,11 @@ pub fn print_board(board: &[[Coin; 7]; 6]) {
     println!();
 }
 
-pub fn print_msg(msg: &str) {
+pub fn print_msg_ln(msg: &str) {
     println!("{}", msg);
+}
+
+pub fn print_msg(msg: &str) {
+    print!("{}", msg);
+    stdout().flush().unwrap();
 }

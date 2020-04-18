@@ -48,7 +48,7 @@ impl Game {
             if self.place_coin(col - 1) {
                 break;
             } else {
-                console_view::print_msg(
+                console_view::print_msg_ln(
                     format!("Column {} is full. Place it somewhere else.", col).as_str(),
                 );
             }
