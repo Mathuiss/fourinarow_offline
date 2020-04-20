@@ -1,12 +1,13 @@
 use crate::controllers::console_controller;
 use crate::views::console_view;
 
+#[derive(Debug)]
 pub enum Player {
     Red,
     Yellow,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Coin {
     Red,
     Yellow,
@@ -15,8 +16,8 @@ pub enum Coin {
 
 pub struct Game {
     board: [[Coin; 7]; 6],
-    current_player: Player,
-    is_won: bool,
+    pub current_player: Player,
+    pub is_won: bool,
 }
 
 impl Game {
@@ -31,10 +32,6 @@ impl Game {
         g
     }
 
-    pub fn check_won(&self) -> bool {
-        self.is_won
-    }
-
     pub fn play_turn(&mut self) {
         loop {
             // Show current player
@@ -45,7 +42,11 @@ impl Game {
 
             // Place coin
             // -1 to adjust for 0 based array
-            if self.place_coin(col - 1) {
+            let (success, x, y) = self.place_coin(col - 1);
+
+            if success {
+                self.is_won = self.evaluate_coin_win(x, y);
+
                 break;
             } else {
                 console_view::print_msg_ln(
@@ -54,9 +55,6 @@ impl Game {
             }
         }
 
-        // evaluate_win
-        self.evaluate_win();
-
         // Reset current player
         self.reset_current_player();
 
@@ -64,20 +62,77 @@ impl Game {
         console_view::print_board(&self.board);
     }
 
-    fn evaluate_win(&self) {
-        println!("Evaluation later");
+    fn evaluate_coin_win(&mut self, x: usize, y: usize) -> bool {
+        let mut found_streak = false;
+        let target = self.board[y][x];
+        let mut streak_counter = 0;
+
+        // Evaluate horizontal
+        let mut i = 0;
+        while i < self.board[y].len() {
+            if found_streak {
+                if self.board[y][i] == target {
+                    streak_counter += 1;
+                } else {
+                    streak_counter = 0;
+                    found_streak = false;
+                }
+            } else {
+                if self.board[y][i] == target {
+                    streak_counter += 1;
+                    found_streak = true;
+                }
+            }
+
+            if streak_counter != 4 {
+                i += 1;
+            } else {
+                return true;
+            }
+        }
+
+        // Evaluate vertical
+        i = 0;
+        while i < self.board.len() {
+            if found_streak {
+                if self.board[i][x] == target {
+                    streak_counter += 1;
+                } else {
+                    streak_counter = 0;
+                    found_streak = false;
+                }
+            } else {
+                if self.board[i][x] == target {
+                    streak_counter += 1;
+                    found_streak = true;
+                }
+            }
+
+            if streak_counter != 4 {
+                i += 1;
+            } else {
+                return true;
+            }
+        }
+
+        // Evaluate post slope
+        // Evaluate neg slope
+
+        return false;
     }
 
-    fn place_coin(&mut self, col: u8) -> bool {
+    fn place_coin(&mut self, col: usize) -> (bool, usize, usize) {
         let mut has_placed = false;
+        let mut row = 0;
 
         for y in (0..6).rev() {
-            match self.board[y as usize][col as usize] {
+            match self.board[y][col] {
                 Coin::No => {
-                    self.board[y as usize][col as usize] = match self.current_player {
+                    self.board[y][col] = match self.current_player {
                         Player::Red => Coin::Red,
                         Player::Yellow => Coin::Yellow,
                     };
+                    row = y as usize;
                     has_placed = true;
                     break;
                 }
@@ -85,7 +140,7 @@ impl Game {
             }
         }
 
-        has_placed
+        (has_placed, col, row)
     }
 
     fn reset_current_player(&mut self) {
