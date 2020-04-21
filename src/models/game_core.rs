@@ -63,11 +63,12 @@ impl Game {
     }
 
     fn evaluate_coin_win(&mut self, x: usize, y: usize) -> bool {
-        let mut found_streak = false;
         let target = self.board[y][x];
-        let mut streak_counter = 0;
 
         // Evaluate horizontal
+        let mut found_streak = false;
+        let mut streak_counter = 0;
+
         let mut i = 0;
         while i < self.board[y].len() {
             if found_streak {
@@ -92,7 +93,11 @@ impl Game {
         }
 
         // Evaluate vertical
+        found_streak = false;
+        streak_counter = 0;
+
         i = 0;
+
         while i < self.board.len() {
             if found_streak {
                 if self.board[i][x] == target {
@@ -115,8 +120,80 @@ impl Game {
             }
         }
 
-        // Evaluate post slope
-        // Evaluate neg slope
+        // Evaluate positive slope
+        found_streak = false;
+        streak_counter = 0;
+
+        // i = iterates x axis
+        // n = n iterates y axis
+        i = x;
+        let mut n = y;
+
+        while i != 0 && n < self.board.len() - 1 {
+            i -= 1;
+            n += 1;
+        }
+
+        while n != 0 && i < self.board[n].len() {
+            if found_streak {
+                if self.board[n][i] == target {
+                    streak_counter += 1;
+                } else {
+                    streak_counter = 0;
+                    found_streak = false;
+                }
+            } else {
+                if self.board[n][i] == target {
+                    streak_counter += 1;
+                    found_streak = true;
+                }
+            }
+
+            if streak_counter != 4 {
+                i += 1;
+                n -= 1;
+            } else {
+                return true;
+            }
+        }
+
+        // Evaluate negative slope
+        found_streak = false;
+        streak_counter = 0;
+
+        // i = iterates x axis
+        // n = n iterates y axis
+        i = x;
+        n = y;
+
+        // Set starting point
+        while i != 0 && n != 0 {
+            i -= 1;
+            n -= 1;
+        }
+
+        while n < self.board.len() && i < self.board[n].len() {
+            if found_streak {
+                if self.board[n][i] == target {
+                    streak_counter += 1;
+                } else {
+                    streak_counter = 0;
+                    found_streak = false;
+                }
+            } else {
+                if self.board[n][i] == target {
+                    streak_counter += 1;
+                    found_streak = true;
+                }
+            }
+
+            if streak_counter != 4 {
+                i += 1;
+                n += 1;
+            } else {
+                return true;
+            }
+        }
 
         return false;
     }
