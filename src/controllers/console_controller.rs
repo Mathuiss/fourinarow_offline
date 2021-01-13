@@ -5,7 +5,8 @@ pub fn read_col() -> usize {
     loop {
         let mut buf = String::new();
         stdin().read_line(&mut buf).unwrap();
-        buf = buf.replace("\r\n", "");
+        buf = buf.replace("\r", "");
+        buf = buf.replace("\n", "");
         let input: usize = match buf.parse() {
             Result::Ok(r) => r,
             Result::Err(_) => {
